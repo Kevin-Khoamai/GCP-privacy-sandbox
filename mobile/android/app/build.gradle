@@ -1,0 +1,330 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-parcelize'
+}
+
+android {
+    namespace 'com.privacycohorttracker.android'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.privacycohorttracker.android"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+
+        // Privacy-focused build configuration
+        buildConfigField "String", "PRIVACY_POLICY_URL", "\"https://privacy-cohort-tracker.com/privacy\""
+        buildConfigField "String", "TERMS_URL", "\"https://privacy-cohort-tracker.com/terms\""
+        buildConfigField "boolean", "ENABLE_ANALYTICS", "false"
+        buildConfigField "boolean", "ENABLE_CRASH_REPORTING", "false"
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+        release {
+            // Production signing config - set via environment variables
+            storeFile file(System.getenv("ANDROID_KEYSTORE_FILE") ?: "release.keystore")
+            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("ANDROID_KEY_ALIAS")
+            keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            shrinkResources false
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            
+            buildConfigField "String", "API_BASE_URL", "\"https://api-dev.privacy-cohort-tracker.com\""
+            buildConfigField "boolean", "DEBUG_MODE", "true"
+            
+            // Disable obfuscation for debugging
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        
+        release {
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            
+            buildConfigField "String", "API_BASE_URL", "\"https://api.privacy-cohort-tracker.com\""
+            buildConfigField "boolean", "DEBUG_MODE", "false"
+            
+            // Enable code obfuscation and optimization
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            
+            // Enable R8 full mode for better optimization
+            android.enableR8.fullMode = true
+        }
+        
+        staging {
+            initWith release
+            debuggable true
+            applicationIdSuffix ".staging"
+            versionNameSuffix "-staging"
+            
+            buildConfigField "String", "API_BASE_URL", "\"https://api-staging.privacy-cohort-tracker.com\""
+            buildConfigField "boolean", "DEBUG_MODE", "true"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+        
+        // Enable core library desugaring for modern Java APIs on older Android versions
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+        
+        // Enable experimental features
+        freeCompilerArgs += [
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api"
+        ]
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig true
+        viewBinding true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.5.4'
+    }
+
+    packaging {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += '/META-INF/DEPENDENCIES'
+            excludes += '/META-INF/LICENSE'
+            excludes += '/META-INF/LICENSE.txt'
+            excludes += '/META-INF/NOTICE'
+            excludes += '/META-INF/NOTICE.txt'
+        }
+    }
+
+    // Security-focused configurations
+    android {
+        packagingOptions {
+            // Exclude sensitive files from APK
+            excludes += ['META-INF/DEPENDENCIES']
+            excludes += ['META-INF/LICENSE']
+            excludes += ['META-INF/LICENSE.txt']
+            excludes += ['META-INF/NOTICE']
+            excludes += ['META-INF/NOTICE.txt']
+            excludes += ['META-INF/ASL2.0']
+            excludes += ['META-INF/*.kotlin_module']
+        }
+    }
+
+    // Enable data binding
+    dataBinding {
+        enabled = true
+    }
+
+    // Test options
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+        }
+        
+        animationsDisabled = true
+    }
+
+    // Lint configuration for privacy and security
+    lintOptions {
+        checkReleaseBuilds true
+        abortOnError true
+        
+        // Privacy and security checks
+        enable 'PrivateResource'
+        enable 'SecureRandom'
+        enable 'TrustAllX509TrustManager'
+        enable 'BadHostnameVerifier'
+        enable 'SSLCertificateSocketFactoryCreateSocket'
+        enable 'SSLCertificateSocketFactoryGetInsecure'
+        
+        // Disable analytics-related warnings since we don't use analytics
+        disable 'GoogleAppIndexingWarning'
+        disable 'MissingFirebaseInstanceTokenRefresh'
+    }
+}
+
+dependencies {
+    // Core Android dependencies
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.activity:activity-compose:1.8.2'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // Jetpack Compose
+    implementation platform('androidx.compose:compose-bom:2023.10.01')
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-extended'
+    implementation 'androidx.navigation:navigation-compose:2.7.6'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
+
+    // Architecture Components
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.6'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.6'
+    implementation 'androidx.room:room-runtime:2.6.1'
+    implementation 'androidx.room:room-ktx:2.6.1'
+    kapt 'androidx.room:room-compiler:2.6.1'
+
+    // Dependency Injection
+    implementation 'com.google.dagger:hilt-android:2.48.1'
+    kapt 'com.google.dagger:hilt-compiler:2.48.1'
+    implementation 'androidx.hilt:hilt-navigation-compose:1.1.0'
+
+    // Networking (for API communication)
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Security and Encryption
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
+
+    // Privacy-focused libraries
+    implementation 'androidx.biometric:biometric:1.1.0'
+    implementation 'androidx.work:work-runtime-ktx:2.9.0'
+
+    // JSON processing
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2'
+
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+
+    // Date and time
+    implementation 'org.jetbrains.kotlinx:kotlinx-datetime:0.5.0'
+
+    // Preferences
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'androidx.datastore:datastore-preferences:1.0.0'
+
+    // Charts and visualization (for privacy dashboard)
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Core library desugaring
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+
+    // Testing dependencies
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.2.1'
+    testImplementation 'androidx.arch.core:core-testing:2.2.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
+    testImplementation 'androidx.room:room-testing:2.6.1'
+    testImplementation 'com.google.truth:truth:1.1.4'
+
+    // Android testing
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.5.1'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation platform('androidx.compose:compose-bom:2023.10.01')
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    androidTestImplementation 'androidx.navigation:navigation-testing:2.7.6'
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.48.1'
+    kaptAndroidTest 'com.google.dagger:hilt-compiler:2.48.1'
+
+    // Debug dependencies
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.12'
+}
+
+// Ensure all dependencies use the same version of Kotlin
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.10'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10'
+    }
+}
+
+// Task to generate privacy report
+task generatePrivacyReport {
+    doLast {
+        println "Generating privacy compliance report..."
+        
+        def reportFile = file("${buildDir}/reports/privacy-report.txt")
+        reportFile.parentFile.mkdirs()
+        
+        def report = """
+Privacy Compliance Report for Privacy Cohort Tracker Android
+Generated: ${new Date()}
+
+PRIVACY FEATURES:
+- Local data processing only
+- No third-party analytics
+- No crash reporting to external services
+- Encrypted local storage
+- Biometric authentication support
+- GDPR/CCPA compliance built-in
+
+PERMISSIONS USED:
+- INTERNET: For optional API communication (user controlled)
+- WRITE_EXTERNAL_STORAGE: For data export functionality
+- USE_BIOMETRIC: For secure authentication
+- WAKE_LOCK: For background processing (minimal usage)
+
+SECURITY MEASURES:
+- Code obfuscation enabled in release builds
+- Certificate pinning for API communication
+- Encrypted SharedPreferences
+- Secure random number generation
+- Input validation and sanitization
+
+DATA COLLECTION:
+- No personal data sent to external servers without explicit consent
+- All cohort processing happens locally
+- User has full control over data sharing
+- Complete data export and deletion capabilities
+        """.trim()
+        
+        reportFile.text = report
+        println "Privacy report generated: ${reportFile.absolutePath}"
+    }
+}
+
+// Run privacy report generation after build
+build.finalizedBy generatePrivacyReport

@@ -1,0 +1,401 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-17",
+  "description": "Privacy-safe topic taxonomy for cohort assignment, excluding sensitive categories",
+  "topics": [
+    {
+      "id": 1,
+      "name": "Arts & Entertainment",
+      "level": 0,
+      "isSensitive": false,
+      "description": "General arts and entertainment content"
+    },
+    {
+      "id": 2,
+      "name": "Movies",
+      "parentId": 1,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Film and cinema content"
+    },
+    {
+      "id": 3,
+      "name": "Action Movies",
+      "parentId": 2,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Action and adventure films"
+    },
+    {
+      "id": 4,
+      "name": "Comedy Movies",
+      "parentId": 2,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Comedy and humor films"
+    },
+    {
+      "id": 5,
+      "name": "Drama Movies",
+      "parentId": 2,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Drama and serious films"
+    },
+    {
+      "id": 6,
+      "name": "Music",
+      "parentId": 1,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Music and audio content"
+    },
+    {
+      "id": 7,
+      "name": "Rock Music",
+      "parentId": 6,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Rock and alternative music"
+    },
+    {
+      "id": 8,
+      "name": "Pop Music",
+      "parentId": 6,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Popular music genres"
+    },
+    {
+      "id": 9,
+      "name": "Classical Music",
+      "parentId": 6,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Classical and orchestral music"
+    },
+    {
+      "id": 10,
+      "name": "Television",
+      "parentId": 1,
+      "level": 1,
+      "isSensitive": false,
+      "description": "TV shows and series"
+    },
+    {
+      "id": 11,
+      "name": "Gaming",
+      "parentId": 1,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Video games and gaming content"
+    },
+    {
+      "id": 12,
+      "name": "Console Gaming",
+      "parentId": 11,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Console video games"
+    },
+    {
+      "id": 13,
+      "name": "PC Gaming",
+      "parentId": 11,
+      "level": 2,
+      "isSensitive": false,
+      "description": "PC and computer games"
+    },
+    {
+      "id": 14,
+      "name": "Mobile Gaming",
+      "parentId": 11,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Mobile and tablet games"
+    },
+    {
+      "id": 15,
+      "name": "Technology",
+      "level": 0,
+      "isSensitive": false,
+      "description": "Technology and computing topics"
+    },
+    {
+      "id": 16,
+      "name": "Consumer Electronics",
+      "parentId": 15,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Consumer electronic devices"
+    },
+    {
+      "id": 17,
+      "name": "Smartphones",
+      "parentId": 16,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Mobile phones and smartphones"
+    },
+    {
+      "id": 18,
+      "name": "Laptops",
+      "parentId": 16,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Laptop computers"
+    },
+    {
+      "id": 19,
+      "name": "Tablets",
+      "parentId": 16,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Tablet devices"
+    },
+    {
+      "id": 20,
+      "name": "Software",
+      "parentId": 15,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Software applications and tools"
+    },
+    {
+      "id": 21,
+      "name": "Business & Finance",
+      "level": 0,
+      "isSensitive": false,
+      "description": "Business and financial topics"
+    },
+    {
+      "id": 22,
+      "name": "Investing",
+      "parentId": 21,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Investment and trading"
+    },
+    {
+      "id": 23,
+      "name": "Stock Market",
+      "parentId": 22,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Stock trading and market analysis"
+    },
+    {
+      "id": 24,
+      "name": "Cryptocurrency",
+      "parentId": 22,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Digital currencies and blockchain"
+    },
+    {
+      "id": 25,
+      "name": "Real Estate",
+      "parentId": 22,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Property investment and real estate"
+    },
+    {
+      "id": 26,
+      "name": "Small Business",
+      "parentId": 21,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Small business and entrepreneurship"
+    },
+    {
+      "id": 27,
+      "name": "Marketing",
+      "parentId": 26,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Business marketing and advertising"
+    },
+    {
+      "id": 28,
+      "name": "E-commerce",
+      "parentId": 26,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Online business and e-commerce"
+    },
+    {
+      "id": 29,
+      "name": "Sports",
+      "level": 0,
+      "isSensitive": false,
+      "description": "Sports and athletics"
+    },
+    {
+      "id": 30,
+      "name": "Football",
+      "parentId": 29,
+      "level": 1,
+      "isSensitive": false,
+      "description": "American football"
+    },
+    {
+      "id": 31,
+      "name": "NFL",
+      "parentId": 30,
+      "level": 2,
+      "isSensitive": false,
+      "description": "National Football League"
+    },
+    {
+      "id": 32,
+      "name": "College Football",
+      "parentId": 30,
+      "level": 2,
+      "isSensitive": false,
+      "description": "College and university football"
+    },
+    {
+      "id": 33,
+      "name": "Basketball",
+      "parentId": 29,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Basketball sports"
+    },
+    {
+      "id": 34,
+      "name": "NBA",
+      "parentId": 33,
+      "level": 2,
+      "isSensitive": false,
+      "description": "National Basketball Association"
+    },
+    {
+      "id": 35,
+      "name": "Soccer",
+      "parentId": 29,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Soccer and football (international)"
+    },
+    {
+      "id": 36,
+      "name": "Baseball",
+      "parentId": 29,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Baseball sports"
+    },
+    {
+      "id": 37,
+      "name": "MLB",
+      "parentId": 36,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Major League Baseball"
+    },
+    {
+      "id": 38,
+      "name": "Health & Fitness",
+      "level": 0,
+      "isSensitive": false,
+      "description": "Health, fitness, and wellness"
+    },
+    {
+      "id": 39,
+      "name": "Exercise",
+      "parentId": 38,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Physical exercise and workouts"
+    },
+    {
+      "id": 40,
+      "name": "Weight Training",
+      "parentId": 39,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Weight lifting and strength training"
+    },
+    {
+      "id": 41,
+      "name": "Cardio",
+      "parentId": 39,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Cardiovascular exercise"
+    },
+    {
+      "id": 42,
+      "name": "Yoga",
+      "parentId": 39,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Yoga and meditation practices"
+    },
+    {
+      "id": 43,
+      "name": "Nutrition",
+      "parentId": 38,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Diet and nutrition"
+    },
+    {
+      "id": 44,
+      "name": "Healthy Eating",
+      "parentId": 43,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Healthy diet and eating habits"
+    },
+    {
+      "id": 45,
+      "name": "Supplements",
+      "parentId": 43,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Nutritional supplements"
+    },
+    {
+      "id": 46,
+      "name": "Travel",
+      "level": 0,
+      "isSensitive": false,
+      "description": "Travel and tourism"
+    },
+    {
+      "id": 47,
+      "name": "Domestic Travel",
+      "parentId": 46,
+      "level": 1,
+      "isSensitive": false,
+      "description": "Travel within country"
+    },
+    {
+      "id": 48,
+      "name": "International Travel",
+      "parentId": 46,
+      "level": 1,
+      "isSensitive": false,
+      "description": "International travel and tourism"
+    },
+    {
+      "id": 49,
+      "name": "Europe Travel",
+      "parentId": 48,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Travel to European destinations"
+    },
+    {
+      "id": 50,
+      "name": "Asia Travel",
+      "parentId": 48,
+      "level": 2,
+      "isSensitive": false,
+      "description": "Travel to Asian destinations"
+    }
+  ]
+}

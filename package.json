@@ -1,0 +1,92 @@
+{
+  "name": "local-privacy-cohort-tracker",
+  "version": "1.0.0",
+  "description": "Privacy-respecting cohort-based tracking system",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run build:shared && npm run build:extension && npm run build:mobile",
+    "build:shared": "tsc -p tsconfig.shared.json",
+    "build:extension": "webpack --config webpack.extension.js",
+    "build:mobile": "echo 'Mobile builds handled by platform-specific tools'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run test/**/*.test.ts --exclude test/**/*integration*.test.ts --exclude test/**/*e2e*.test.ts",
+    "test:integration": "vitest run test/**/*integration*.test.ts",
+    "test:e2e": "vitest run test/**/*e2e*.test.ts",
+    "test:performance": "vitest run test/performance-benchmarks.test.ts",
+    "test:performance:regression": "node scripts/check-performance-regression.js",
+    "test:coverage": "vitest run --coverage",
+    "test:browser:chrome": "vitest run test/cross-platform-compatibility.test.ts --environment chrome",
+    "test:browser:firefox": "vitest run test/cross-platform-compatibility.test.ts --environment firefox",
+    "test:browser:edge": "vitest run test/cross-platform-compatibility.test.ts --environment edge",
+    "test:privacy": "vitest run test/privacy-controls*.test.ts",
+    "test:mobile:ios": "vitest run test/ios-mobile.test.ts",
+    "test:mobile:android": "vitest run test/android-mobile.test.ts",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,json,md}\"",
+    "type-check": "tsc --noEmit",
+
+    "dev": "concurrently \"npm run dev:shared\" \"npm run dev:extension\"",
+    "dev:shared": "tsc -p tsconfig.shared.json --watch",
+    "dev:extension": "webpack --config webpack.extension.js --watch",
+    "dev:debug": "DEBUG=privacy-cohort-tracker:* npm run dev",
+
+    "build:extension:chrome": "webpack --config webpack.extension.js --env browser=chrome",
+    "build:extension:firefox": "webpack --config webpack.extension.js --env browser=firefox",
+    "build:extension:safari": "webpack --config webpack.extension.js --env browser=safari",
+    "build:production": "NODE_ENV=production npm run build",
+
+    "test:security": "vitest run test/security/*.test.ts",
+    "test:update-snapshots": "vitest run --update-snapshots",
+
+    "validate:system": "node scripts/final-system-validation.js",
+    "validate:privacy": "npm run test:privacy",
+    "validate:extension": "echo 'Extension validation placeholder'",
+    "validate:production": "npm run build:production && npm run validate:system",
+
+    "deploy:extension": "node scripts/deploy-extension.js",
+    "deploy:mobile": "node scripts/deploy-mobile.js",
+    "deploy:dry-run": "echo 'Dry run deployment'",
+
+    "clean": "rimraf dist coverage",
+    "clean:all": "npm run clean && rimraf node_modules",
+    "reinstall": "npm run clean:all && npm install"
+  },
+  "keywords": [
+    "privacy",
+    "cohort",
+    "tracking",
+    "browser-extension",
+    "mobile-app"
+  ],
+  "author": "Privacy Cohort Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^20.11.0",
+    "@types/webextension-polyfill": "^0.10.7",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "concurrently": "^8.2.2",
+    "copy-webpack-plugin": "^12.0.2",
+    "eslint": "^8.56.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.2.4",
+    "rimraf": "^5.0.5",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "webextension-polyfill": "^0.10.0"
+  }
+}

@@ -1,0 +1,388 @@
+name: Automated Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run nightly performance regression tests
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '18'
+  CHROME_VERSION: 'stable'
+  FIREFOX_VERSION: 'latest'
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16, 18, 20]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run unit tests
+      run: npm run test:unit
+
+    - name: Generate coverage report
+      run: npm run test:coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unit-tests
+        name: unit-tests-node-${{ matrix.node-version }}
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run integration tests
+      run: npm run test:integration
+
+    - name: Upload integration test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-test-results
+        path: test-results/
+
+  browser-compatibility:
+    name: Browser Compatibility Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup Chrome
+      if: matrix.browser == 'chrome'
+      uses: browser-actions/setup-chrome@latest
+      with:
+        chrome-version: ${{ env.CHROME_VERSION }}
+
+    - name: Setup Firefox
+      if: matrix.browser == 'firefox'
+      uses: browser-actions/setup-firefox@latest
+      with:
+        firefox-version: ${{ env.FIREFOX_VERSION }}
+
+    - name: Setup Edge
+      if: matrix.browser == 'edge'
+      uses: browser-actions/setup-edge@latest
+
+    - name: Run browser compatibility tests
+      run: npm run test:browser:${{ matrix.browser }}
+      env:
+        BROWSER: ${{ matrix.browser }}
+
+    - name: Upload browser test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: browser-test-results-${{ matrix.browser }}
+        path: test-results/browser-${{ matrix.browser }}/
+
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup Chrome for E2E
+      uses: browser-actions/setup-chrome@latest
+      with:
+        chrome-version: ${{ env.CHROME_VERSION }}
+
+    - name: Build extension
+      run: npm run build
+
+    - name: Run E2E tests
+      run: npm run test:e2e
+
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: e2e-test-results
+        path: test-results/e2e/
+
+    - name: Upload screenshots on failure
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: e2e-screenshots
+        path: test-results/screenshots/
+
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[perf-test]')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run performance benchmarks
+      run: npm run test:performance
+
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results
+        path: test-results/performance/
+
+    - name: Check performance regression
+      run: npm run test:performance:regression
+
+    - name: Comment performance results on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = './test-results/performance/summary.json';
+          
+          if (fs.existsSync(path)) {
+            const results = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const comment = `## Performance Test Results
+            
+            | Metric | Current | Baseline | Change |
+            |--------|---------|----------|--------|
+            | Cohort Assignment (small) | ${results.cohortAssignmentSmall}ms | ${results.baseline.cohortAssignmentSmall}ms | ${results.changes.cohortAssignmentSmall} |
+            | Encryption (small) | ${results.encryptionSmall}ms | ${results.baseline.encryptionSmall}ms | ${results.changes.encryptionSmall} |
+            | Memory Usage | ${results.memoryUsage}MB | ${results.baseline.memoryUsage}MB | ${results.changes.memoryUsage} |
+            
+            ${results.regressions.length > 0 ? '⚠️ Performance regressions detected!' : '✅ No performance regressions detected'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
+
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+
+    - name: Run SAST scan
+      uses: github/super-linter@v4
+      env:
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VALIDATE_TYPESCRIPT_ES: true
+        VALIDATE_JAVASCRIPT_ES: true
+
+    - name: Run privacy compliance tests
+      run: npm run test:privacy
+
+    - name: Upload security test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-test-results
+        path: test-results/security/
+
+  mobile-tests:
+    name: Mobile Platform Tests
+    runs-on: macos-latest
+    needs: unit-tests
+    strategy:
+      matrix:
+        platform: [ios, android]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Setup iOS Simulator
+      if: matrix.platform == 'ios'
+      run: |
+        xcrun simctl create "iPhone 14" "iPhone 14" "iOS16.0"
+        xcrun simctl boot "iPhone 14"
+
+    - name: Setup Android Emulator
+      if: matrix.platform == 'android'
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 29
+        script: echo "Android emulator started"
+
+    - name: Run mobile tests
+      run: npm run test:mobile:${{ matrix.platform }}
+
+    - name: Upload mobile test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: mobile-test-results-${{ matrix.platform }}
+        path: test-results/mobile-${{ matrix.platform }}/
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, browser-compatibility, e2e-tests]
+    if: always()
+    
+    steps:
+    - name: Download all test results
+      uses: actions/download-artifact@v3
+
+    - name: Generate test summary
+      run: |
+        echo "# Test Results Summary" > test-summary.md
+        echo "" >> test-summary.md
+        echo "## Test Status" >> test-summary.md
+        echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> test-summary.md
+        echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> test-summary.md
+        echo "- Browser Compatibility: ${{ needs.browser-compatibility.result }}" >> test-summary.md
+        echo "- E2E Tests: ${{ needs.e2e-tests.result }}" >> test-summary.md
+        echo "" >> test-summary.md
+        echo "## Coverage" >> test-summary.md
+        echo "Coverage reports are available in the artifacts." >> test-summary.md
+
+    - name: Upload test summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-summary
+        path: test-summary.md
+
+    - name: Update status check
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const allPassed = [
+            '${{ needs.unit-tests.result }}',
+            '${{ needs.integration-tests.result }}',
+            '${{ needs.browser-compatibility.result }}',
+            '${{ needs.e2e-tests.result }}'
+          ].every(result => result === 'success');
+          
+          const state = allPassed ? 'success' : 'failure';
+          const description = allPassed ? 'All tests passed' : 'Some tests failed';
+          
+          github.rest.repos.createCommitStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.sha,
+            state: state,
+            description: description,
+            context: 'Automated Testing Pipeline'
+          });
+
+  deploy-test-results:
+    name: Deploy Test Results
+    runs-on: ubuntu-latest
+    needs: test-summary
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download test summary
+      uses: actions/download-artifact@v3
+      with:
+        name: test-summary
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        destination_dir: test-results/${{ github.run_number }}
+
+    - name: Update latest results link
+      run: |
+        echo "Latest test results: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/test-results/${{ github.run_number }}/test-summary.md"

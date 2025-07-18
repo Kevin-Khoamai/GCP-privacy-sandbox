@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Privacy Cohort Controls</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>Privacy Cohort Tracker</h1>
+            <div class="status-indicator" id="statusIndicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">Loading...</span>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading your privacy settings...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state hidden">
+            <div class="error-icon">⚠️</div>
+            <h3>Something went wrong</h3>
+            <p id="errorMessage">Unable to load privacy settings</p>
+            <button id="retryButton" class="button button-secondary">Try Again</button>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="main-content hidden">
+            <!-- Statistics Overview -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalCohorts">0</span>
+                        <span class="stat-label">Total Cohorts</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="activeCohorts">0</span>
+                        <span class="stat-label">Active</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="expiringCohorts">0</span>
+                        <span class="stat-label">Expiring Soon</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Global Controls -->
+            <section class="global-controls">
+                <div class="control-item">
+                    <div class="control-info">
+                        <h3>Cohort Tracking</h3>
+                        <p>Enable or disable all cohort assignments</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="globalToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Cohort List -->
+            <section class="cohorts-section">
+                <div class="section-header">
+                    <h2>Your Interest Cohorts</h2>
+                    <button id="helpButton" class="button button-text" title="Learn how this works">
+                        <span class="help-icon">?</span>
+                    </button>
+                </div>
+                
+                <div id="cohortsContainer" class="cohorts-container">
+                    <!-- Cohorts will be populated here -->
+                </div>
+
+                <div id="emptyState" class="empty-state hidden">
+                    <div class="empty-icon">📊</div>
+                    <h3>No cohorts yet</h3>
+                    <p>Browse the web to start building your interest profile</p>
+                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <section class="actions-section">
+                <button id="settingsButton" class="button button-secondary">
+                    Privacy Settings
+                </button>
+                <button id="exportButton" class="button button-secondary">
+                    Export Data
+                </button>
+            </section>
+        </div>
+
+        <!-- Help Modal -->
+        <div id="helpModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>How Privacy Cohorts Work</h3>
+                    <button id="closeHelpModal" class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="helpContent" class="help-content">
+                        <!-- Help content will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Privacy Settings</h3>
+                    <button id="closeSettingsModal" class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-content">
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="shareWithAdvertisers">
+                                Share cohorts with advertisers
+                            </label>
+                            <p class="setting-description">Allow websites to access your cohort IDs for relevant advertising</p>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label for="dataRetentionDays">Data retention (days)</label>
+                            <select id="dataRetentionDays">
+                                <option value="7">1 week</option>
+                                <option value="14">2 weeks</option>
+                                <option value="21">3 weeks (recommended)</option>
+                                <option value="30">1 month</option>
+                            </select>
+                            <p class="setting-description">How long to keep cohort assignments</p>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button id="saveSettingsButton" class="button button-primary">Save Settings</button>
+                        <button id="deleteAllDataButton" class="button button-danger">Delete All Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

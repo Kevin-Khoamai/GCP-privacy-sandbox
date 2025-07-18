@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "Local Privacy Cohort Tracker",
+  "version": "1.0.0",
+  "description": "Privacy-respecting cohort-based tracking system for Safari",
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation",
+    "activeTab",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Privacy Cohort Controls"
+  },
+  "web_accessible_resources": [
+    "popup.html",
+    "popup.css"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "manifest_version": 2,
+  "name": "Privacy Cohort Tracker",
+  "version": "1.0.0",
+  "description": "Privacy-preserving interest cohort tracking for enhanced user control and transparency",
+  
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation",
+    "notifications",
+    "activeTab",
+    "http://*/*",
+    "https://*/*"
+  ],
+  
+  "optional_permissions": [
+    "history"
+  ],
+  
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "Privacy Cohort Tracker",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  
+  "content_security_policy": "script-src 'self'; object-src 'self'",
+  
+  "web_accessible_resources": [
+    "icons/*"
+  ],
+  
+  "author": "Privacy Cohort Tracker Team",
+  "homepage_url": "https://github.com/privacy-cohort-tracker/extension",
+  
+  "commands": {
+    "toggle-cohorts": {
+      "suggested_key": {
+        "default": "Cmd+Shift+P"
+      },
+      "description": "Toggle cohort tracking on/off"
+    },
+    "open-privacy-dashboard": {
+      "suggested_key": {
+        "default": "Cmd+Shift+D"
+      },
+      "description": "Open privacy dashboard"
+    }
+  },
+  
+  "default_locale": "en"
+}
